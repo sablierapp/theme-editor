@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="index, follow">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="google" content="nositelinkssearchbox">
+    <link rel="canonical" href="https://editor.sablierapp.dev/">
+
+    <title>Sablier Theme Editor</title>
+    <meta name="description" content="Edit and live preview HTML theme for Sablier. Requires WebAssembly support.">
+
+    <meta property="og:title" content="Sablier Theme Editor">
+    <meta property="og:description" content="Edit and live preview HTML theme for Sablier. Requires WebAssembly support.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editor.sablierapp.dev/">
+
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/sablierapp/artwork/refs/heads/main/icon/sablier-icon-color.png">
+
+    <style>
+        * {
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            appearance: none;
+            border: 0;
+            box-sizing: border-box;
+            color: inherit;
+            margin: 0;
+            outline: none;
+            padding: 0;
+        }
+        section {
+            margin: 0 auto;
+            width: 100%;
+            padding: 1rem;
+        }
+        select {
+            background: transparent;
+        }
+        textarea {
+            background: transparent;
+            display: block;
+            font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+            font-size: .85rem;
+            line-height: 1.5;
+            height: 100%;
+            resize: none;
+            white-space: pre;
+            width: 100%;
+        }
+        h2{font-size:.7rem;letter-spacing:.033rem;font-weight:400}
+        a {display: inline-block; text-decoration: none}
+        a:hover {text-decoration: underline}
+        .textarea {
+            background: rgb(55 57 83 / 0.3);
+            border-radius: 1rem;
+            border: 1px solid rgb(221 214 254 / 0.1);
+            padding: 1rem;
+        }
+        .textarea-light {
+            background-color: aliceblue;
+            border: 1px solid rgb(221 214 254 / 0.05);
+            padding: .02rem;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js" integrity="sha512-yjhIcftV1KZyd3rLPujicRV6NpFEuCqQaOBBdrey6vFdU1zVkJYgJf9a+15YrOuzzSXYNV2GU4xdQ8Xy9Zj/fA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/scripts/wasm_exec.js"></script>
+    <script>
+        const go = new Go();
+        WebAssembly.instantiateStreaming(fetch("/scripts/template.wasm"), go.importObject).then((result) => {
+            go.run(result.instance);
+            loadEditors()
+        });
+        function render() {
+            var output = template(ace.edit("input-editor").getValue(), ace.edit("data-editor").getValue());
+            console.log(output)
+            var doc = document.getElementById('output').contentWindow.document;
+            doc.open();
+            doc.write(output);
+            doc.close();
+        }
+        function loadFromLocalStorage() {
+            var input_editor = ace.edit("input-editor");
+            var value = localStorage.getItem("input_editor");
+            if (typeof value == "string") {
+                input_editor.session.setValue(value);
+            } else {
+                loadFromGithub({value: "shuffle"})
+            }
+
+            var data_editor = ace.edit("data-editor");
+            value = localStorage.getItem("data_editor");
+            if (typeof value == "string") {
+                data_editor.session.setValue(value);
+            } else {
+                data_editor.session.setValue(JSON.stringify({
+                    "DisplayName": "Test",
+                    "InstanceStates": [
+                        {
+                            "Name": "starting-instance",
+                            "Status": "instance is starting...",
+                            "Error": null,
+                            "CurrentReplicas": 0,
+                            "DesiredReplicas": 1
+                        }
+                    ],
+                    "ShowDetails": true,
+                    "SessionDuration": "10 minutes",
+                    "RefreshFrequency": 500000000
+                }, null, 2));
+            }
+        }
+        function loadFromGithub(theme) {
+            fetch(`https://raw.githubusercontent.com/acouvreur/sablier/refs/heads/main/app/theme/embedded/${theme.value}.html`)
+                .then(value => value.text().then(body => {
+                    ace.edit("input-editor").setValue(body)
+                }))
+        }
+        function saveInputToLocalStorage() {
+            var input_editor = ace.edit("input-editor");
+            localStorage.setItem(
+                "input_editor",
+                input_editor.session.getValue()
+            );
+        }
+        function saveDataToLocalStorage() {
+            var data_editor = ace.edit("data-editor");
+            localStorage.setItem(
+                "data_editor",
+                data_editor.session.getValue()
+            );
+        }
+        function loadEditors() {
+            var input_editor = ace.edit("input-editor");
+            input_editor.setTheme("ace/theme/monokai");
+            input_editor.session.setMode("ace/mode/html");
+            input_editor.session.on('change', function (delta) {
+                // delta.start, delta.end, delta.lines, delta.action
+                render()
+                saveInputToLocalStorage()
+            });
+
+
+            var data_editor = ace.edit("data-editor");
+            data_editor.setTheme("ace/theme/monokai");
+            data_editor.session.setMode("ace/mode/json");
+            data_editor.session.on('change', function (delta) {
+                // delta.start, delta.end, delta.lines, delta.action
+                render()
+                saveDataToLocalStorage()
+            })
+
+            loadFromLocalStorage()
+        }
+    </script>
+</head>
+
+<body style="
+		background: black;
+		background-image:
+			radial-gradient(farthest-corner at 0 100vh, #2700828F 0%, transparent 67%),
+			radial-gradient(farthest-corner at 100vw 100vh, #7A0BC05F 0%, transparent 67%);
+		color: white;
+		font-family: 'BlinkMacSystemFont', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+		min-width: 600px;
+	">
+<section id="header" style="display:flex;align-items:center;height:calc(90px + 2rem)">
+    <div>
+        <h1 style="font-size:1.8rem;font-weight:600">Sablier Theme Editor</h1>
+        <label>
+            Import theme:
+            <select onchange="loadFromGithub(this)">
+                <option value="ghost">ghost</option>
+                <option value="hacker-terminal">hacker-terminal</option>
+                <option value="matrix">matrix</option>
+                <option value="shuffle">shuffle</option>
+            </select>
+        </label>
+    </div>
+</section>
+
+<section id="main" style="display:flex;align-items:center;height:calc(calc(100vh - calc(calc(90px + 2rem) * 1)) - 2rem);min-height:calc(600px + 2rem);padding-bottom:1rem">
+    <div style="margin:0 auto;height:100%;width:calc(35% - .5rem);margin-right:1rem">
+        <div id="input-editor" style="height:calc(80% - .5rem);margin-bottom:1rem">
+        </div>
+        <div id="data-editor" style="height:calc(20% - .5rem)">
+        </div>
+    </div>
+    <div style="margin:0 auto;height:100%;width:calc(65% - .5rem)">
+        <div class="textarea-light" style="height:calc(100%);display: flex;">
+            <iframe style="flex-grow: 1; border: none; margin: 0; padding: 0;" id="output"></iframe>
+        </div>
+    </div>
+</section>
+<section id="footer" style="padding-top:0;font-size:.8rem">
+    <p style="text-align: center;opacity:.67"><a href="https://github.com/sablierapp/theme-editor" target="_blank">Github</a></p>
+</section>
+</body>
+</html>
