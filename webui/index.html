@@ -52,19 +52,37 @@
         h2{font-size:.7rem;letter-spacing:.033rem;font-weight:400}
         a {display: inline-block; text-decoration: none}
         a:hover {text-decoration: underline}
-        .textarea {
+        .toolbar {
             background: rgb(55 57 83 / 0.3);
-            border-radius: 1rem;
             border: 1px solid rgb(221 214 254 / 0.1);
-            padding: 1rem;
+        }
+        .toolbar button {
+            background: rgb(55 57 83 / 0.3);
+            border: 1px solid rgb(221 214 254 / 0.1);
+        }
+        .toolbar button:hover {
+            cursor: pointer;
+            background: rgb(135 139 201 / 0.3);
+            border: 1px solid rgb(221 214 254 / 0.1);
+        }
+        .toolbar button:active {
+            cursor: pointer;
+            background: rgb(135 139 201 / 0.3);
         }
         .textarea-light {
             background-color: aliceblue;
             border: 1px solid rgb(221 214 254 / 0.05);
             padding: .02rem;
         }
+        #footer > p > a:not(:first-child)::before {
+            content: " | ";
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js" integrity="sha512-yjhIcftV1KZyd3rLPujicRV6NpFEuCqQaOBBdrey6vFdU1zVkJYgJf9a+15YrOuzzSXYNV2GU4xdQ8Xy9Zj/fA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ext-language_tools.min.js" integrity="sha512-4l33zsqrqf1PBA3iEZ399Jl9on7It0HngOkI3TG2c6W0wUyTiXRxd9Eh8zFBXNy8fMlgda/u4u1metnbEf5Hzg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/mode-html.min.js" integrity="sha512-JSkDZ0Crk8+F/F/lCqh6LZ/mzPqhSrRanUC3TExEziPsbLPFIJQmR5R7p954sdM88cOL9+WlVR6XBFJa3nXcdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/mode-json.min.js" integrity="sha512-K+H+3WTfhwE9fnfv4makUYJxz4kwIadQPOjGHAmOT96FtMSPRnvnuGR/sZjuNB2MmmHQ94Mnc9zoDxTHKMMEww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://www.unpkg.com/ace-linters@latest/build/ace-linters.js"></script>
     <script src="/scripts/wasm_exec.js"></script>
     <script>
         const go = new Go();
@@ -74,7 +92,6 @@
         });
         function render() {
             var output = template(ace.edit("input-editor").getValue(), ace.edit("data-editor").getValue());
-            console.log(output)
             var doc = document.getElementById('output').contentWindow.document;
             doc.open();
             doc.write(output);
@@ -112,7 +129,7 @@
             }
         }
         function loadFromGithub(theme) {
-            fetch(`https://raw.githubusercontent.com/acouvreur/sablier/refs/heads/main/app/theme/embedded/${theme.value}.html`)
+            fetch(`https://raw.githubusercontent.com/acouvreur/sablier/refs/heads/main/app/theme/embedded/${theme}.html`)
                 .then(value => value.text().then(body => {
                     ace.edit("input-editor").setValue(body)
                 }))
@@ -135,21 +152,44 @@
             var input_editor = ace.edit("input-editor");
             input_editor.setTheme("ace/theme/monokai");
             input_editor.session.setMode("ace/mode/html");
+            input_editor.setOptions({
+                enableBasicAutocompletion: true,
+                enableLiveAutocompletion: true
+            })
             input_editor.session.on('change', function (delta) {
                 // delta.start, delta.end, delta.lines, delta.action
                 render()
                 saveInputToLocalStorage()
             });
 
-
             var data_editor = ace.edit("data-editor");
             data_editor.setTheme("ace/theme/monokai");
             data_editor.session.setMode("ace/mode/json");
+            data_editor.setOptions({
+                enableBasicAutocompletion: true,
+                enableLiveAutocompletion: true
+            })
             data_editor.session.on('change', function (delta) {
                 // delta.start, delta.end, delta.lines, delta.action
                 render()
                 saveDataToLocalStorage()
             })
+
+            // Create a language provider from CDN
+            var provider = LanguageProvider.fromCdn("https://www.unpkg.com/ace-linters@latest/build/");
+
+            // Register the editor with the language provider
+            provider.registerEditor(data_editor);
+            provider.setGlobalOptions("json", {
+                schemas: [
+                    {
+                        uri: `${window.location.href}theme.schema.json`,
+                    }
+                ]
+            });
+            provider.setSessionOptions(data_editor.session, {
+                schemaUri: "${window.location.href}theme.schema.json"
+            });
 
             loadFromLocalStorage()
         }
@@ -160,41 +200,57 @@
 		background: black;
 		background-image:
 			radial-gradient(farthest-corner at 0 100vh, #2700828F 0%, transparent 67%),
-			radial-gradient(farthest-corner at 100vw 100vh, #7A0BC05F 0%, transparent 67%);
+			radial-gradient(farthest-corner at 100vw 100vh, rgba(229,121,27,0.37) 0%, transparent 67%);
 		color: white;
 		font-family: 'BlinkMacSystemFont', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 		min-width: 600px;
 	">
-<section id="header" style="display:flex;align-items:center;height:calc(90px + 2rem)">
+<section id="header" style="display:flex;align-items:center;height:calc(40px)">
     <div>
         <h1 style="font-size:1.8rem;font-weight:600">Sablier Theme Editor</h1>
-        <label>
-            Import theme:
-            <select onchange="loadFromGithub(this)">
-                <option value="ghost">ghost</option>
-                <option value="hacker-terminal">hacker-terminal</option>
-                <option value="matrix">matrix</option>
-                <option value="shuffle">shuffle</option>
-            </select>
-        </label>
     </div>
 </section>
 
-<section id="main" style="display:flex;align-items:center;height:calc(calc(100vh - calc(calc(90px + 2rem) * 1)) - 2rem);min-height:calc(600px + 2rem);padding-bottom:1rem">
+<section id="main" style="display:flex;align-items:center;height:calc(calc(100vh - 40px) - 2rem);min-height:calc(600px + 2rem);padding-bottom:1rem">
     <div style="margin:0 auto;height:100%;width:calc(35% - .5rem);margin-right:1rem">
-        <div id="input-editor" style="height:calc(80% - .5rem);margin-bottom:1rem">
+        <span style="height:1.4rem;display:flex;align-items:flex-start;padding:0 .5rem">
+            <h2 style="opacity:.75">TEMPLATE <span style="opacity:.5">in <a href="https://pkg.go.dev/text/template#hdr-Actions" target="_blank">Go</a> format</span></h2>
+        </span>
+        <div class="toolbar" style="height:1.4rem;width: 100%">
+            <button onclick="loadFromGithub('ghost')">ghost</button>
+            <button onclick="loadFromGithub('hacker-terminal')">hacker-terminal</button>
+            <button onclick="loadFromGithub('matrix')">matrix</button>
+            <button onclick="loadFromGithub('shuffle')">shuffle</button>
         </div>
-        <div id="data-editor" style="height:calc(20% - .5rem)">
+        <div id="input-editor" style="height:calc(80% - 3.3rem);margin-bottom:1rem">
+        </div>
+        <span style="height:1.4rem;display:flex;align-items:flex-start;padding:0 .5rem">
+            <h2 style="opacity:.75">DATA <span style="opacity:.5">in <a href="theme.schema.json" target="_blank">JSON Schema</a> format</span></h2>
+        </span>
+        <div class="toolbar" style="height:1.4rem;width: 100%">
+            <button>format</button>
+            <button>reset</button>
+        </div>
+        <div id="data-editor" style="height:calc(20% - 3.3rem)">
         </div>
     </div>
     <div style="margin:0 auto;height:100%;width:calc(65% - .5rem)">
-        <div class="textarea-light" style="height:calc(100%);display: flex;">
+        <span style="height:1.4rem;display:flex;align-items:flex-start;padding:0 .5rem">
+            <h2 style="opacity:.75">PREVIEW</h2>
+        </span>
+        <div class="toolbar" style="height:1.4rem;width: 100%">
+            <button>fullscreen</button>
+        </div>
+        <div class="textarea-light" style="height:calc(100% - 2.9rem);display: flex;">
             <iframe style="flex-grow: 1; border: none; margin: 0; padding: 0;" id="output"></iframe>
         </div>
     </div>
 </section>
 <section id="footer" style="padding-top:0;font-size:.8rem">
-    <p style="text-align: center;opacity:.67"><a href="https://github.com/sablierapp/theme-editor" target="_blank">Github</a></p>
+    <p style="text-align: center;opacity:.67">
+        <a href="https://github.com/sablierapp/theme-editor" target="_blank">GitHub</a>
+        <a href="https://github.com/sablierapp/theme-editor/issues/new" target="_blank">Open an Issue</a>
+    </p>
 </section>
 </body>
 </html>

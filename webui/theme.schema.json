@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://editor.sablierapp.dev/theme.schema.json",
+  "title": "Theme Input Data",
+  "description": "Theme input data schema",
+  "type": "object",
+  "properties": {
+    "DisplayName": {
+      "type": "string",
+      "description": "The display name"
+    },
+    "InstanceStates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "Status": {
+            "type": "string"
+          },
+          "Error": {
+            "type": "string"
+          },
+          "CurrentReplicas": {
+            "type": "number",
+            "minimum": 0
+          },
+          "DesiredReplicas": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "ShowDetails": {
+      "type": "boolean"
+    },
+    "SessionDuration": {
+      "type": "string"
+    },
+    "RefreshFrequency": {
+      "type": "number"
+    }
+  }
+}
