@@ -122,10 +122,20 @@
         });
         function render() {
             var output = template(ace.edit("input-editor").getValue(), ace.edit("data-editor").getValue());
-            var doc = document.getElementById('output').contentWindow.document;
-            doc.open();
-            doc.write(output);
-            doc.close();
+            var frame = document.getElementById('output')
+            var oldSrc = frame.src
+            frame.src = ''; // Clear the current content
+            setTimeout(() => {
+                // Create a Blob URL for the code and set it as the iframe's source
+                const blob = new Blob([output], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                frame.src = url; // Load new code into the iframe
+
+                if (oldSrc) {
+                    console.log("Clearing old object:" + oldSrc)
+                    URL.revokeObjectURL(oldSrc);
+                }
+            }, 0); // Delay to allow the iframe to clear
         }
         function loadFromLocalStorage() {
             var input_editor = ace.edit("input-editor");
