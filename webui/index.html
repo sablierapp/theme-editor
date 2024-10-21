@@ -103,7 +103,7 @@
             if (typeof value == "string") {
                 input_editor.session.setValue(value);
             } else {
-                loadFromGithub("shuffle")
+                loadFromGithub("hacker-terminal")
             }
 
             var data_editor = ace.edit("data-editor");
@@ -112,12 +112,26 @@
                 data_editor.session.setValue(value);
             } else {
                 data_editor.session.setValue(JSON.stringify({
-                    "DisplayName": "Test",
+                    "DisplayName": "my sablier session",
                     "InstanceStates": [
                         {
-                            "Name": "starting-instance",
+                            "Name": "nginx",
+                            "Status": "instance is ready",
+                            "Error": null,
+                            "CurrentReplicas": 1,
+                            "DesiredReplicas": 1
+                        },
+                        {
+                            "Name": "vscode",
                             "Status": "instance is starting...",
                             "Error": null,
+                            "CurrentReplicas": 0,
+                            "DesiredReplicas": 1
+                        },
+                        {
+                            "Name": "mongodb",
+                            "Status": "error",
+                            "Error": "container mongodb is unhealthy",
                             "CurrentReplicas": 0,
                             "DesiredReplicas": 1
                         }
