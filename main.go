@@ -39,27 +39,6 @@ func main() {
 		return b.String()
 	})
 	js.Global().Set("template", render)
-
-	convertData := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		if len(args) != 3 {
-			return "Must provide three arguments: inputData, fromFormat, toFormat"
-		}
-		inputData := args[0].String()
-		fromFmt := args[1].String()
-		toFmt := args[2].String()
-
-		data, err := decode(inputData)
-		if err != nil {
-			return fmt.Sprintf("Error decoding from '%s': %v", fromFmt, err)
-		}
-		output, err := encode(data)
-		if err != nil {
-			return fmt.Sprintf("Error encoding to '%s': %v", toFmt, err)
-		}
-		return string(output)
-	})
-	js.Global().Set("ExpConvertData", convertData)
-
 	// Wait forever
 	<-make(chan bool)
 }
@@ -69,8 +48,4 @@ func decode(inputData string) (data interface{}, err error) {
 		return nil, err
 	}
 	return
-}
-
-func encode(input interface{}) (output []byte, err error) {
-	return json.MarshalIndent(input, "", "  ")
 }
