@@ -85,6 +85,36 @@
     <script src="https://www.unpkg.com/ace-linters@latest/build/ace-linters.js"></script>
     <script src="/scripts/wasm_exec.js"></script>
     <script>
+        const defaultData = JSON.stringify({
+            "DisplayName": "my sablier session",
+            "InstanceStates": [
+                {
+                    "Name": "nginx",
+                    "Status": "instance is ready",
+                    "Error": null,
+                    "CurrentReplicas": 1,
+                    "DesiredReplicas": 1
+                },
+                {
+                    "Name": "vscode",
+                    "Status": "instance is starting...",
+                    "Error": null,
+                    "CurrentReplicas": 0,
+                    "DesiredReplicas": 1
+                },
+                {
+                    "Name": "mongodb",
+                    "Status": "error",
+                    "Error": "container mongodb is unhealthy",
+                    "CurrentReplicas": 0,
+                    "DesiredReplicas": 1
+                }
+            ],
+            "ShowDetails": true,
+            "SessionDuration": "10 minutes",
+            "RefreshFrequency": 500000000
+        }, null, 2)
+
         const go = new Go();
         WebAssembly.instantiateStreaming(fetch("/scripts/template.wasm"), go.importObject).then((result) => {
             go.run(result.instance);
@@ -111,37 +141,10 @@
             if (typeof value == "string") {
                 data_editor.session.setValue(value);
             } else {
-                data_editor.session.setValue(JSON.stringify({
-                    "DisplayName": "my sablier session",
-                    "InstanceStates": [
-                        {
-                            "Name": "nginx",
-                            "Status": "instance is ready",
-                            "Error": null,
-                            "CurrentReplicas": 1,
-                            "DesiredReplicas": 1
-                        },
-                        {
-                            "Name": "vscode",
-                            "Status": "instance is starting...",
-                            "Error": null,
-                            "CurrentReplicas": 0,
-                            "DesiredReplicas": 1
-                        },
-                        {
-                            "Name": "mongodb",
-                            "Status": "error",
-                            "Error": "container mongodb is unhealthy",
-                            "CurrentReplicas": 0,
-                            "DesiredReplicas": 1
-                        }
-                    ],
-                    "ShowDetails": true,
-                    "SessionDuration": "10 minutes",
-                    "RefreshFrequency": 500000000
-                }, null, 2));
+                data_editor.session.setValue(defaultData);
             }
         }
+
         function loadFromGithub(theme) {
             fetch(`https://raw.githubusercontent.com/acouvreur/sablier/refs/heads/main/app/theme/embedded/${theme}.html`)
                 .then(value => value.text().then(body => {
@@ -161,6 +164,16 @@
                 "data_editor",
                 data_editor.session.getValue()
             );
+        }
+        function formatDataEditor() {
+            var data_editor = ace.edit("data-editor");
+            var current = data_editor.session.getValue()
+            var formatted = JSON.stringify(JSON.parse(current), null, 2)
+            data_editor.session.setValue(formatted)
+        }
+        function resetDataEditor() {
+            var data_editor = ace.edit("data-editor");
+            data_editor.session.setValue(defaultData);
         }
         function loadEditors() {
             var input_editor = ace.edit("input-editor");
@@ -242,8 +255,8 @@
             <h2 style="opacity:.75">DATA <span style="opacity:.5">in <a href="theme.schema.json" target="_blank">JSON Schema</a> format</span></h2>
         </span>
         <div class="toolbar" style="height:1.4rem;width: 100%">
-            <button>format</button>
-            <button>reset</button>
+            <button onclick="formatDataEditor()">format</button>
+            <button onclick="resetDataEditor()">reset</button>
         </div>
         <div id="data-editor" style="height:calc(20% - 3.3rem)">
         </div>
