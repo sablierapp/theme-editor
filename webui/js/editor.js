@@ -189,6 +189,76 @@ function loadEditors() {
     loadFromLocalStorage()
 }
 
+// Panel contents by component name, kept so they can be re-attached when
+// the layout is rebuilt
+const panels = {
+    template: document.getElementById("panel-template"),
+    data: document.getElementById("panel-data"),
+    preview: document.getElementById("panel-preview"),
+}
+
+function applyDefaultLayout(layout) {
+    var container = document.getElementById("layout")
+    layout.clear()
+    layout.addPanel({ id: "template", component: "template", title: "Template" })
+    layout.addPanel({
+        id: "preview",
+        component: "preview",
+        title: "Preview",
+        position: { referencePanel: "template", direction: "right" },
+        initialWidth: container.clientWidth * 0.65,
+    })
+    layout.addPanel({
+        id: "data",
+        component: "data",
+        title: "Data",
+        position: { referencePanel: "template", direction: "below" },
+        initialHeight: container.clientHeight * 0.25,
+    })
+}
+
+function restoreLayout(layout) {
+    try {
+        layout.fromJSON(JSON.parse(localStorage.getItem("layout")))
+        if (Object.keys(panels).every(id => layout.getPanel(id))) {
+            return
+        }
+    } catch (e) {
+        // No saved layout, or one that no longer matches the panels
+    }
+    applyDefaultLayout(layout)
+}
+
+function createLayout() {
+    const { createDockview, themeDark } = window["dockview-core"]
+    var layout = createDockview(document.getElementById("layout"), {
+        theme: themeDark,
+        disableFloatingGroups: true,
+        createComponent: options => ({ element: panels[options.name], init: () => {} }),
+    })
+    var saveLayout = () => {
+        try {
+            localStorage.setItem("layout", JSON.stringify(layout.toJSON()))
+        } catch (e) {
+            // Storage unavailable, the layout just won't be remembered
+        }
+    }
+    restoreLayout(layout)
+    saveLayout()
+    layout.onDidLayoutChange(saveLayout)
+    document.getElementById("reset-layout").addEventListener("click", () => applyDefaultLayout(layout))
+
+    // Ace only resizes with the window, so follow the panel sizes instead
+    var observer = new ResizeObserver(entries => entries.forEach(entry => {
+        if (entry.target.env && entry.target.env.editor) {
+            entry.target.env.editor.resize()
+        }
+    }))
+    observer.observe(document.getElementById("input-editor"))
+    observer.observe(document.getElementById("data-editor"))
+}
+
+createLayout()
 loadThemeButtons()
 document.getElementById("theme-buttons").addEventListener("click", event => {
     var button = event.target.closest("[data-theme]")

@@ -25,47 +25,50 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/mode-html.min.js" integrity="sha512-JSkDZ0Crk8+F/F/lCqh6LZ/mzPqhSrRanUC3TExEziPsbLPFIJQmR5R7p954sdM88cOL9+WlVR6XBFJa3nXcdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/mode-json.min.js" integrity="sha512-K+H+3WTfhwE9fnfv4makUYJxz4kwIadQPOjGHAmOT96FtMSPRnvnuGR/sZjuNB2MmmHQ94Mnc9zoDxTHKMMEww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://www.unpkg.com/ace-linters@latest/build/ace-linters.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dockview-core@8.5.1/dist/dockview-core.min.js" integrity="sha384-utsm2mLnFiX4rC5rCXo6H5oIMRFjILt44PNPhoC5gEcdRJYWpJFDEzb3Lesl7jEc" crossorigin="anonymous"></script>
     <script src="/scripts/wasm_exec.js"></script>
     <script src="/js/editor.js" defer></script>
 </head>
 
 <body>
 <section id="header">
-    <div>
-        <h1>Sablier Theme Editor</h1>
+    <h1>Sablier Theme Editor</h1>
+    <div class="toolbar">
+        <button id="reset-layout">reset layout</button>
     </div>
 </section>
 
 <section id="main">
-    <div class="column column-editors">
-        <span class="panel-title">
-            <h2>TEMPLATE <span>in <a href="https://pkg.go.dev/text/template#hdr-Actions" target="_blank">Go</a> format</span></h2>
-        </span>
-        <div class="toolbar" id="theme-buttons"></div>
-        <div id="input-editor">
+    <div id="layout"></div>
+</section>
+
+<!-- Panel contents, moved into the layout by js/editor.js -->
+<div hidden>
+    <div class="panel" id="panel-template">
+        <div class="toolbar">
+            <span id="theme-buttons"></span>
+            <a class="toolbar-help" href="https://pkg.go.dev/text/template#hdr-Actions" target="_blank">Go template syntax</a>
         </div>
-        <span class="panel-title">
-            <h2>DATA <span>in <a href="theme.schema.json" target="_blank">JSON Schema</a> format</span></h2>
-        </span>
+        <div class="panel-body" id="input-editor"></div>
+    </div>
+    <div class="panel" id="panel-data">
         <div class="toolbar">
             <button id="format-data">format</button>
             <button id="reset-data">reset</button>
+            <a class="toolbar-help" href="theme.schema.json" target="_blank">JSON Schema</a>
         </div>
-        <div id="data-editor">
-        </div>
+        <div class="panel-body" id="data-editor"></div>
     </div>
-    <div class="column column-preview">
-        <span class="panel-title">
-            <h2>PREVIEW</h2>
-        </span>
+    <div class="panel" id="panel-preview">
         <div class="toolbar">
             <button id="fullscreen-preview">fullscreen</button>
         </div>
-        <div class="textarea-light preview">
+        <div class="panel-body textarea-light preview">
             <iframe id="output"></iframe>
         </div>
     </div>
-</section>
+</div>
+
 <section id="footer">
     <p>
         <a href="https://github.com/sablierapp/theme-editor" target="_blank">GitHub</a>
