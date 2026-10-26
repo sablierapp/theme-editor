@@ -171,7 +171,7 @@
         }
 
         function loadFromGithub(theme) {
-            fetch(`https://raw.githubusercontent.com/acouvreur/sablier/refs/heads/main/app/theme/embedded/${theme}.html`)
+            fetch(`https://raw.githubusercontent.com/sablierapp/sablier/refs/heads/main/pkg/theme/embedded/${theme}.html`)
                 .then(value => value.text().then(body => {
                     ace.edit("input-editor").setValue(body)
                 }))
@@ -272,6 +272,7 @@
             <button onclick="loadFromGithub('ghost')">ghost</button>
             <button onclick="loadFromGithub('hacker-terminal')">hacker-terminal</button>
             <button onclick="loadFromGithub('matrix')">matrix</button>
+            <button onclick="loadFromGithub('retro')">retro</button>
             <button onclick="loadFromGithub('shuffle')">shuffle</button>
         </div>
         <div id="input-editor" style="height:calc(80% - 3.3rem);margin-bottom:1rem">
