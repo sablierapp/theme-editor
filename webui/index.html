@@ -90,29 +90,44 @@
             "InstanceStates": [
                 {
                     "Name": "nginx",
-                    "Status": "instance is ready",
+                    "Status": "ready",
                     "Error": null,
                     "CurrentReplicas": 1,
-                    "DesiredReplicas": 1
+                    "DesiredReplicas": 1,
+                    "Provider": "docker",
+                    "Docker": {
+                        "id": "a1b2c3d4e5f6",
+                        "image": "nginx:latest"
+                    }
                 },
                 {
                     "Name": "vscode",
-                    "Status": "instance is starting...",
+                    "Status": "starting",
                     "Error": null,
                     "CurrentReplicas": 0,
-                    "DesiredReplicas": 1
+                    "DesiredReplicas": 1,
+                    "Provider": "docker",
+                    "Docker": {
+                        "id": "b2c3d4e5f6a1",
+                        "image": "codercom/code-server:latest"
+                    }
                 },
                 {
                     "Name": "mongodb",
                     "Status": "error",
                     "Error": "container mongodb is unhealthy",
                     "CurrentReplicas": 0,
-                    "DesiredReplicas": 1
+                    "DesiredReplicas": 1,
+                    "Provider": "docker",
+                    "Docker": {
+                        "id": "c3d4e5f6a1b2",
+                        "image": "mongo:latest"
+                    }
                 }
             ],
-            "ShowDetails": true,
             "SessionDuration": "10 minutes",
-            "RefreshFrequency": 500000000
+            "RefreshFrequency": "5",
+            "Version": "1.18.0"
         }, null, 2)
 
         const go = new Go();
