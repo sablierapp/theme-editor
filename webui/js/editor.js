@@ -134,6 +134,15 @@ function resetDataEditor() {
     var data_editor = ace.edit("data-editor");
     data_editor.session.setValue(defaultData);
 }
+function fullscreenPreview() {
+    var frame = document.getElementById("output")
+    if (!document.fullscreenEnabled) {
+        // e.g. Safari on iPhone, where only video elements can go fullscreen
+        window.open(frame.src, "_blank")
+        return
+    }
+    frame.requestFullscreen()
+}
 function loadEditors() {
     var input_editor = ace.edit("input-editor");
     input_editor.setTheme("ace/theme/monokai");
@@ -189,3 +198,4 @@ document.getElementById("theme-buttons").addEventListener("click", event => {
 })
 document.getElementById("format-data").addEventListener("click", formatDataEditor)
 document.getElementById("reset-data").addEventListener("click", resetDataEditor)
+document.getElementById("fullscreen-preview").addEventListener("click", fullscreenPreview)
