@@ -1,0 +1,166 @@
+const defaultData = JSON.stringify({
+    "DisplayName": "my sablier session",
+    "InstanceStates": [
+        {
+            "Name": "nginx",
+            "Status": "ready",
+            "Error": null,
+            "CurrentReplicas": 1,
+            "DesiredReplicas": 1,
+            "Provider": "docker",
+            "Docker": {
+                "id": "a1b2c3d4e5f6",
+                "image": "nginx:latest"
+            }
+        },
+        {
+            "Name": "vscode",
+            "Status": "starting",
+            "Error": null,
+            "CurrentReplicas": 0,
+            "DesiredReplicas": 1,
+            "Provider": "docker",
+            "Docker": {
+                "id": "b2c3d4e5f6a1",
+                "image": "codercom/code-server:latest"
+            }
+        },
+        {
+            "Name": "mongodb",
+            "Status": "error",
+            "Error": "container mongodb is unhealthy",
+            "CurrentReplicas": 0,
+            "DesiredReplicas": 1,
+            "Provider": "docker",
+            "Docker": {
+                "id": "c3d4e5f6a1b2",
+                "image": "mongo:latest"
+            }
+        }
+    ],
+    "SessionDuration": "10 minutes",
+    "RefreshFrequency": "5",
+    "Version": "1.18.0"
+}, null, 2)
+
+const go = new Go();
+WebAssembly.instantiateStreaming(fetch("/scripts/template.wasm"), go.importObject).then((result) => {
+    go.run(result.instance);
+    loadEditors()
+});
+function render() {
+    var output = template(ace.edit("input-editor").getValue(), ace.edit("data-editor").getValue());
+    var frame = document.getElementById('output')
+    var oldSrc = frame.src
+    frame.src = ''; // Clear the current content
+    setTimeout(() => {
+        // Create a Blob URL for the code and set it as the iframe's source
+        const blob = new Blob([output], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        frame.src = url; // Load new code into the iframe
+
+        if (oldSrc) {
+            console.log("Clearing old object:" + oldSrc)
+            URL.revokeObjectURL(oldSrc);
+        }
+    }, 0); // Delay to allow the iframe to clear
+}
+function loadFromLocalStorage() {
+    var input_editor = ace.edit("input-editor");
+    var value = localStorage.getItem("input_editor");
+    if (typeof value == "string") {
+        input_editor.session.setValue(value);
+    } else {
+        loadFromGithub("hacker-terminal")
+    }
+
+    var data_editor = ace.edit("data-editor");
+    value = localStorage.getItem("data_editor");
+    if (typeof value == "string") {
+        data_editor.session.setValue(value);
+    } else {
+        data_editor.session.setValue(defaultData);
+    }
+}
+
+function loadFromGithub(theme) {
+    fetch(`https://raw.githubusercontent.com/sablierapp/sablier/refs/heads/main/pkg/theme/embedded/${theme}.html`)
+        .then(value => value.text().then(body => {
+            ace.edit("input-editor").setValue(body)
+        }))
+}
+function saveInputToLocalStorage() {
+    var input_editor = ace.edit("input-editor");
+    localStorage.setItem(
+        "input_editor",
+        input_editor.session.getValue()
+    );
+}
+function saveDataToLocalStorage() {
+    var data_editor = ace.edit("data-editor");
+    localStorage.setItem(
+        "data_editor",
+        data_editor.session.getValue()
+    );
+}
+function formatDataEditor() {
+    var data_editor = ace.edit("data-editor");
+    var current = data_editor.session.getValue()
+    var formatted = JSON.stringify(JSON.parse(current), null, 2)
+    data_editor.session.setValue(formatted)
+}
+function resetDataEditor() {
+    var data_editor = ace.edit("data-editor");
+    data_editor.session.setValue(defaultData);
+}
+function loadEditors() {
+    var input_editor = ace.edit("input-editor");
+    input_editor.setTheme("ace/theme/monokai");
+    input_editor.session.setMode("ace/mode/html");
+    input_editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true
+    })
+    input_editor.session.on('change', function (delta) {
+        // delta.start, delta.end, delta.lines, delta.action
+        render()
+        saveInputToLocalStorage()
+    });
+
+    var data_editor = ace.edit("data-editor");
+    data_editor.setTheme("ace/theme/monokai");
+    data_editor.session.setMode("ace/mode/json");
+    data_editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true
+    })
+    data_editor.session.on('change', function (delta) {
+        // delta.start, delta.end, delta.lines, delta.action
+        render()
+        saveDataToLocalStorage()
+    })
+
+    // Create a language provider from CDN
+    var provider = LanguageProvider.fromCdn("https://www.unpkg.com/ace-linters@latest/build/");
+
+    // Register the editor with the language provider
+    provider.registerEditor(data_editor);
+    provider.setGlobalOptions("json", {
+        schemas: [
+            {
+                uri: `${window.location.href}theme.schema.json`,
+            }
+        ]
+    });
+    provider.setSessionOptions(data_editor.session, {
+        schemaUri: `${window.location.href}theme.schema.json`
+    });
+
+    loadFromLocalStorage()
+}
+
+document.querySelectorAll("[data-theme]").forEach(button => {
+    button.addEventListener("click", () => loadFromGithub(button.dataset.theme))
+})
+document.getElementById("format-data").addEventListener("click", formatDataEditor)
+document.getElementById("reset-data").addEventListener("click", resetDataEditor)
