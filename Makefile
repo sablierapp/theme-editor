@@ -7,7 +7,7 @@ all: \
 
 $(TARGET)/wasm_exec.js:
 	mkdir -p $(dir $@)
-	cp $(shell go env GOROOT)/misc/wasm/wasm_exec.js $@
+	cp $(shell go env GOROOT)/lib/wasm/wasm_exec.js $@
 
 $(TARGET)/template.wasm: $(wildcard *.go **/*.go)
 	mkdir -p $(dir $@)
