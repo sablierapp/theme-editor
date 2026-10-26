@@ -83,6 +83,27 @@ function loadFromLocalStorage() {
     }
 }
 
+// Themes shown when the list cannot be fetched from GitHub
+const fallbackThemes = ["ghost", "hacker-terminal", "matrix", "retro", "shuffle"]
+
+function loadThemeButtons() {
+    fetch("https://api.github.com/repos/sablierapp/sablier/contents/pkg/theme/embedded?ref=main")
+        .then(response => response.ok ? response.json() : Promise.reject(response.status))
+        .then(files => files
+            .filter(file => file.type === "file" && file.name.endsWith(".html"))
+            .map(file => file.name.slice(0, -".html".length)))
+        .then(themes => themes.length > 0 ? themes : fallbackThemes)
+        .catch(() => fallbackThemes)
+        .then(themes => {
+            document.getElementById("theme-buttons").replaceChildren(...themes.map(theme => {
+                var button = document.createElement("button")
+                button.dataset.theme = theme
+                button.textContent = theme
+                return button
+            }))
+        })
+}
+
 function loadFromGithub(theme) {
     fetch(`https://raw.githubusercontent.com/sablierapp/sablier/refs/heads/main/pkg/theme/embedded/${theme}.html`)
         .then(value => value.text().then(body => {
@@ -159,8 +180,12 @@ function loadEditors() {
     loadFromLocalStorage()
 }
 
-document.querySelectorAll("[data-theme]").forEach(button => {
-    button.addEventListener("click", () => loadFromGithub(button.dataset.theme))
+loadThemeButtons()
+document.getElementById("theme-buttons").addEventListener("click", event => {
+    var button = event.target.closest("[data-theme]")
+    if (button) {
+        loadFromGithub(button.dataset.theme)
+    }
 })
 document.getElementById("format-data").addEventListener("click", formatDataEditor)
 document.getElementById("reset-data").addEventListener("click", resetDataEditor)
