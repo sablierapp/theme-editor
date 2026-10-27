@@ -14,17 +14,18 @@ This website allows you to live edit and preview Golang [html/templates](https:/
 
 ## Features
 
-- Rich editor (See [Ace (Ajax.org Cloud9 Editor)](https://github.com/ajaxorg/ace)
+- Rich editor (See [Ace (Ajax.org Cloud9 Editor)](https://github.com/ajaxorg/ace))
 - Theme input data window with [JSON Schema](./webui/theme.schema.json)
-- Golang html/template preview in the browser (With WebAssembly)
-- Load default themes from [Sablier](https://acouvreur.github.io/sablier/#/main/themes)
-- Editor content is saved to local storage
+- Golang html/template preview in the browser (With WebAssembly), rendered with the same data as Sablier
+- Load the built-in themes from [Sablier](https://sablierapp.dev/how-to-guides/loading-strategies/customize-theme/)
+- Rearrange and resize the template, data and preview panels
+- Editor content and layout are saved to local storage
 
 ## Development
 
-Run `make all` and then `npx serve ./webui`.
+Run `make dev` and open http://localhost:8090 (requires Go and Node.js).
 
-Everytime you change the wasm file, you need to rebuild with `make all`.
+The page reloads on every change in `webui`, and the wasm is rebuilt whenever a `.go` file changes. Use `make dev PORT=3000` to serve on another port.
 
 ## Credits
 

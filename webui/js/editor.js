@@ -86,6 +86,13 @@ function loadFromLocalStorage() {
 // Themes shown when the list cannot be fetched from GitHub
 const fallbackThemes = ["ghost", "hacker-terminal", "matrix", "retro", "shuffle"]
 
+function highlightTheme() {
+    var current = localStorage.getItem("theme")
+    document.querySelectorAll("#theme-buttons [data-theme]").forEach(button => {
+        button.setAttribute("aria-pressed", button.dataset.theme === current)
+    })
+}
+
 function loadThemeButtons() {
     fetch("https://api.github.com/repos/sablierapp/sablier/contents/pkg/theme/embedded?ref=main")
         .then(response => response.ok ? response.json() : Promise.reject(response.status))
@@ -99,15 +106,19 @@ function loadThemeButtons() {
                 var button = document.createElement("button")
                 button.dataset.theme = theme
                 button.textContent = theme
+                button.title = `Replace the template with the ${theme} theme`
                 return button
             }))
+            highlightTheme()
         })
 }
 
 function loadFromGithub(theme) {
     fetch(`https://raw.githubusercontent.com/sablierapp/sablier/refs/heads/main/pkg/theme/embedded/${theme}.html`)
         .then(value => value.text().then(body => {
-            ace.edit("input-editor").setValue(body)
+            ace.edit("input-editor").setValue(body, -1) // -1: cursor at start, nothing selected
+            localStorage.setItem("theme", theme)
+            highlightTheme()
         }))
 }
 function saveInputToLocalStorage() {
@@ -145,7 +156,7 @@ function fullscreenPreview() {
 }
 function loadEditors() {
     var input_editor = ace.edit("input-editor");
-    input_editor.setTheme("ace/theme/monokai");
+    input_editor.setTheme("ace/theme/github_dark");
     input_editor.session.setMode("ace/mode/html");
     input_editor.setOptions({
         enableBasicAutocompletion: true,
@@ -158,7 +169,7 @@ function loadEditors() {
     });
 
     var data_editor = ace.edit("data-editor");
-    data_editor.setTheme("ace/theme/monokai");
+    data_editor.setTheme("ace/theme/github_dark");
     data_editor.session.setMode("ace/mode/json");
     data_editor.setOptions({
         enableBasicAutocompletion: true,
@@ -232,7 +243,8 @@ function restoreLayout(layout) {
 function createLayout() {
     const { createDockview, themeDark } = window["dockview-core"]
     var layout = createDockview(document.getElementById("layout"), {
-        theme: themeDark,
+        // Dark theme, restyled in css/editor.css, with space between panels
+        theme: { ...themeDark, gap: 8 },
         disableFloatingGroups: true,
         createComponent: options => ({ element: panels[options.name], init: () => {} }),
     })

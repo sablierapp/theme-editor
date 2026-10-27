@@ -1,3 +1,21 @@
+/* Styled after the Sablier documentation at sablierapp.dev: neutral dark
+   background, outlined cards, pill buttons and an orange accent. */
+:root {
+    --accent: #ff9f33;
+    --accent-soft: rgb(255 159 51 / 0.14);
+
+    --bg: #111111;
+    --surface: #161616;
+    --border: #262626;
+    --border-strong: #404040;
+    --text: #f3f4f6;
+    --muted: #a3a3a3;
+
+    --radius: 16px;
+    --gap: 10px;
+    color-scheme: dark;
+}
+
 * {
     -moz-appearance: none;
     -webkit-appearance: none;
@@ -10,124 +28,225 @@
     padding: 0;
 }
 body {
-    background: black;
-    background-image:
-        radial-gradient(farthest-corner at 0 100vh, #2700828F 0%, transparent 67%),
-        radial-gradient(farthest-corner at 100vw 100vh, rgba(229,121,27,0.37) 0%, transparent 67%);
-    color: white;
-    font-family: 'BlinkMacSystemFont', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-size: 14px;
     min-width: 600px;
 }
-section {
-    margin: 0 auto;
-    width: 100%;
-    padding: 1rem;
+a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color .15s;
 }
-select {
-    background: transparent;
+a:hover {
+    color: var(--text);
 }
-textarea {
-    background: transparent;
-    display: block;
-    font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
-    font-size: .85rem;
-    line-height: 1.5;
-    height: 100%;
-    resize: none;
-    white-space: pre;
-    width: 100%;
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
-h1 {font-size:1.8rem;font-weight:600}
-a {display: inline-block; text-decoration: none}
-a:hover {text-decoration: underline}
 
 #header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    height: 40px;
+    gap: 12px;
+    height: 64px;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border);
 }
-#header .toolbar {
-    width: auto;
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+}
+.brand img {
+    height: 24px;
+}
+.brand-name {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+}
+.brand-tag {
+    font-size: 15px;
+    font-weight: 500;
+}
+.brand-tag::before {
+    content: "/";
+    margin-right: 12px;
+    color: var(--border-strong);
+}
+#header nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-left: auto;
+    font-size: 14px;
+}
+#header nav .icon {
+    display: flex;
+}
+/* Styled like the search box of the documentation */
+.nav-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: #1f1f1f;
+    color: var(--muted);
+    font-size: 13px;
+}
+.nav-button:hover {
+    background: #262626;
+    color: var(--text);
+}
+.nav-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
 }
 #main {
-    height: calc(100vh - 40px - 2rem);
-    min-height: calc(600px + 2rem);
+    height: calc(100vh - 64px);
+    min-height: 500px;
+    padding: var(--gap);
 }
 #layout {
     height: 100%;
 }
-#footer {
-    padding-top: 0;
-    font-size: .8rem;
+
+/* Buttons, like the search box of the documentation */
+button {
+    padding: 3px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: #1f1f1f;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #d4d4d4;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color .15s, background-color .15s;
 }
-#footer > p {
-    text-align: center;
-    opacity: .67;
+button:hover {
+    background: #262626;
+    color: var(--text);
 }
-#footer > p > a:not(:first-child)::before {
-    content: " | ";
+button:active,
+button[aria-pressed="true"] {
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
 .panel {
     display: flex;
     flex-direction: column;
     height: 100%;
+    background: var(--surface);
 }
 .panel-body {
     flex: 1;
     min-height: 0;
 }
-/* Panels cannot be reopened once closed, so hide the tab close buttons */
-#layout .dv-default-tab-action {
-    display: none;
-}
-
 .toolbar {
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    gap: .25rem;
-    height: 1.4rem;
-    width: 100%;
-    background: rgb(55 57 83 / 0.3);
-    border: 1px solid rgb(221 214 254 / 0.1);
+    gap: 6px;
+    flex-wrap: wrap;
+    min-height: 40px;
+    padding: 6px 16px;
+    border-bottom: 1px solid var(--border);
 }
-.toolbar button {
-    background: rgb(55 57 83 / 0.3);
-    border: 1px solid rgb(221 214 254 / 0.1);
+.toolbar-label {
+    margin-right: 4px;
+    color: #737373;
+    font-size: 12px;
+    white-space: nowrap;
 }
-.toolbar button:hover {
-    cursor: pointer;
-    background: rgb(135 139 201 / 0.3);
-    border: 1px solid rgb(221 214 254 / 0.1);
-}
-.toolbar button:active {
-    cursor: pointer;
-    background: rgb(135 139 201 / 0.3);
-}
+/* Let the theme buttons wrap along with the rest of the toolbar */
 #theme-buttons {
-    display: flex;
-    gap: .25rem;
+    display: contents;
 }
 .toolbar-help {
+    display: flex;
     margin-left: auto;
-    padding: 0 .5rem;
-    font-size: .7rem;
-    opacity: .5;
+    padding-left: 8px;
+    color: #737373;
 }
 
-.textarea-light {
-    background-color: aliceblue;
-    border: 1px solid rgb(221 214 254 / 0.05);
-    padding: .02rem;
-}
 .preview {
     display: flex;
+    background: white;
 }
 .preview iframe {
     flex-grow: 1;
-    border: none;
-    margin: 0;
-    padding: 0;
+}
+
+/* Editors: blend Ace into the panels */
+#layout .ace_editor {
+    background-color: var(--surface);
+    font-size: 13px;
+}
+#layout .ace_gutter {
+    background: var(--surface);
+    color: #525252;
+}
+#layout .ace_gutter-active-line,
+#layout .ace_marker-layer .ace_active-line {
+    background: #1f1f1f;
+}
+#layout .ace_marker-layer .ace_selection {
+    background: rgb(255 159 51 / 0.25);
+}
+
+/* Layout: dockview's dark theme as outlined cards */
+#layout .dockview-theme-dark {
+    --dv-group-view-background-color: var(--surface);
+    --dv-tabs-and-actions-container-background-color: var(--surface);
+    --dv-tabs-and-actions-container-height: 40px;
+    --dv-tabs-and-actions-container-font-size: 13px;
+    --dv-activegroup-visiblepanel-tab-background-color: var(--surface);
+    --dv-activegroup-hiddenpanel-tab-background-color: var(--surface);
+    --dv-inactivegroup-visiblepanel-tab-background-color: var(--surface);
+    --dv-inactivegroup-hiddenpanel-tab-background-color: var(--surface);
+    --dv-activegroup-visiblepanel-tab-color: var(--text);
+    --dv-activegroup-hiddenpanel-tab-color: var(--muted);
+    --dv-inactivegroup-visiblepanel-tab-color: var(--text);
+    --dv-inactivegroup-hiddenpanel-tab-color: var(--muted);
+    --dv-tab-divider-color: transparent;
+    --dv-separator-border: transparent;
+    --dv-paneview-header-border-color: var(--border);
+    --dv-paneview-active-outline-color: var(--accent);
+    --dv-active-sash-color: var(--accent);
+    --dv-drag-over-background-color: var(--accent-soft);
+    --dv-drag-over-border-color: var(--accent);
+    --dv-edge-dock-indicator-color: var(--accent);
+    --dv-border-radius: var(--radius);
+    background: transparent;
+}
+#layout .dv-groupview {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+#layout .dv-groupview:hover {
+    border-color: var(--border-strong);
+}
+#layout .dv-tabs-and-actions-container {
+    padding: 0 6px;
+}
+#layout .dv-tab {
+    font-weight: 600;
+}
+/* The visible panel of each group is underlined in orange */
+#layout .dv-tab.dv-active-tab {
+    box-shadow: inset 0 -2px 0 var(--accent);
+}
+/* Panels cannot be reopened once closed, so hide the tab close buttons */
+#layout .dv-default-tab-action {
+    display: none;
 }
