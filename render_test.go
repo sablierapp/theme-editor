@@ -39,6 +39,13 @@ func TestRender(t *testing.T) {
 			want: `nginx:latest web`,
 		},
 		{
+			// https://github.com/sablierapp/theme-editor/issues/1
+			name: "replicas compare with integer literals",
+			tmpl: `{{- range $i, $instance := .InstanceStates }}{{- if ( gt $instance.DesiredReplicas 1 ) }}{{ $instance.Name }}:ha;{{- else }}{{ $instance.Name }}:standalone;{{- end }}{{ end -}}`,
+			data: `{"InstanceStates": [{"Name": "a", "DesiredReplicas": 1}, {"Name": "b", "DesiredReplicas": 4}]}`,
+			want: `a:standalone;b:ha;`,
+		},
+		{
 			name:    "misspelled field fails like it does in Sablier",
 			tmpl:    `{{ .DisplayNam }}`,
 			data:    `{}`,
